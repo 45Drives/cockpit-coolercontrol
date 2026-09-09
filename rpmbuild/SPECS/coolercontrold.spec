@@ -5,12 +5,12 @@
 %global cargo_install_lib 0
 
 Name:           %{project}d
-Version:        4.3.1
-Release:        45d1%{?dist}
+Version:        5.0.0
+Release:        45d%{?autorelease}%{!?autorelease:0%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
 ExclusiveArch:  x86_64 aarch64
-License:        GPL-3.0-or-later
+License:        GPL-3.0-or-later AND OFL-1.1
 URL:            https://gitlab.com/%{project}/%{project}
 
 BuildRequires:  systemd-rpm-macros
@@ -36,6 +36,9 @@ your system quiet, cool, and stable.
 %prep
 %autosetup -n %{project}-%{version}/%{name} -a 0
 tar -xzf %{SOURCE1}
+# brotli 8.0.4 ships .rs files with the exec bit set, so brp-mangle-shebangs reads their
+# leading `#![allow(...)]` as a shebang that does not start with '/' and fails the build.
+find vendor -type f -name '*.rs' -exec chmod a-x {} +
 %{?cargo_prep:%cargo_prep -v vendor}
 
 %{?generate_buildrequires}
@@ -81,6 +84,9 @@ popd
 %systemd_postun_with_restart %{name}.service
 
 %changelog
+* Sun Sep 06 2026 Guy Boldon <gb@guyboldon.com> - 5.0.0-1
+- 5.0.0 Release
+
 * Sat May 23 2026 Guy Boldon <gb@guyboldon.com> - 4.3.1-1
 - 4.3.1 Release
 
@@ -224,4 +230,3 @@ popd
 
 * Sun Feb 05 2023 Guy Boldon <gb@guyboldon.com> - 0.14.0-0
 - 0.14.0 Release
-
