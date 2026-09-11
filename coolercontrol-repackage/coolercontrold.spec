@@ -30,6 +30,7 @@ Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/d
 Patch: 0001-allow-embedding-in-cross-origin-iframe.patch
 Patch: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
 Patch: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
+Patch: 0004-Cargo.toml-opt-in-to-edition2024-feature-for-focal-b.patch
 
 %description
 This is the system daemon for CoolerControl.

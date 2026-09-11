@@ -9,8 +9,13 @@ echo "Version: $DEBIAN_VERSION (upstream: $UPSTREAM_VERSION)"
 
 rm -rf build
 mkdir -p build
+ln -sf "/sources/coolercontrol-$UPSTREAM_VERSION.tar.gz" \
+    "coolercontrol_$UPSTREAM_VERSION.orig.tar.gz"
+ln -sf "/sources/coolercontrold-vendor-$UPSTREAM_VERSION.tar.gz" \
+    "coolercontrol_$UPSTREAM_VERSION.orig-cargo-vendor.tar.gz"
 tar -xf /sources/coolercontrol-"$UPSTREAM_VERSION".tar.gz --strip-components=1 --directory build
-tar -xf /sources/coolercontrold-vendor-"$UPSTREAM_VERSION".tar.gz --directory build
+mkdir -p build/cargo-vendor
+tar -xf /sources/coolercontrold-vendor-"$UPSTREAM_VERSION".tar.gz --directory build/cargo-vendor
 rm -rf build/debian
 cp -a /debian build/debian
 cp -a /patches build/debian/patches
@@ -32,10 +37,10 @@ fi
 
 echo Installing build dependencies
 echo "####################################################"
-mk-build-deps \
+sudo mk-build-deps \
     --install \
     --remove \
-    --tool 'sudo apt-get --yes --no-install-recommends' \
+    --tool 'apt-get --yes --no-install-recommends' \
     build/debian/control || echo "WARNING: mk-build-deps exited with code $?"
 
 sed -i "s/UNRELEASED/$CODENAME/g" build/debian/changelog
@@ -54,4 +59,12 @@ if (( ${#packages[@]} == 0 )); then
     find . -type f -name '*.deb'
     exit 1
 fi
-cp -a "${packages[@]}" /out/
+artifacts=(
+    ./*.deb
+    ./*.dsc
+    ./*.changes
+    ./*.buildinfo
+    ./*.debian.tar.*
+    ./*.orig.tar.*
+)
+cp -aL "${artifacts[@]}" /out/

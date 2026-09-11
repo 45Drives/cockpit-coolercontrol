@@ -47,7 +47,9 @@ for dockerfile in ./docker/*.dockerfile; do
 done
 
 for pid in "${build_pids[@]}"; do
-    if ! wait "$pid"; then
+    if wait "$pid"; then
+        continue
+    else
         result=$?
         echo "Build failed with PID $pid" >&2
         exit $result
@@ -89,12 +91,12 @@ done
 for job in "${JOBS[@]}"; do
     pid="${job%%:*}"
     OS_NAME="${job#*:}"
-    if ! wait "$pid"; then
+    if wait "$pid"; then
+        echo "Build succeeded for $OS_NAME"
+    else
         RESULT=$?
         echo "Build failed for $OS_NAME" >&2
         cat log/"$OS_NAME.log" >&2
-    else
-        echo "Build succeeded for $OS_NAME"
     fi
 done
 

@@ -1,3 +1,4 @@
 0001-allow-embedding-in-cross-origin-iframe.patch
 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
 0003-feat-theme-update-color-palette-to-match-cockpit.patch
+0004-Cargo.toml-opt-in-to-edition2024-feature-for-focal-b.patch
