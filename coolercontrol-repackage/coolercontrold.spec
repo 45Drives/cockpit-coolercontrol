@@ -88,6 +88,9 @@ popd
 %systemd_postun_with_restart %{name}.service
 
 %changelog
+* Fri Sep 11 2026 Josh Boudreau <jboudreau@45drives.com> - 5.0.0-45d1
+- Apply 45Drives integration patches.
+
 * Sun Sep 06 2026 Guy Boldon <gb@guyboldon.com> - 5.0.0-1
 - 5.0.0 Release
 
