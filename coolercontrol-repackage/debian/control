@@ -1,0 +1,52 @@
+Source: coolercontrol
+Maintainer: Guy Boldon <gb@guyboldon.com>
+Section: admin
+Priority: optional
+Rules-Requires-Root: no
+Standards-Version: 4.6.2
+Build-Depends:
+ debhelper-compat (= 13),
+# coolercontrold:
+ nodejs,
+ cargo (>= 1.88) | cargo-1.91 | cargo-1.88,
+ libdrm-dev,
+ npm,
+# coolercontrol:
+#  build-essential,
+#  cmake (>= 3.15),
+#  libgl1-mesa-dev,
+#  libqt6opengl6-dev,
+#  qt6-base-dev,
+#  qt6-webengine-dev,
+#  qt6-webengine-dev-tools,
+Homepage: https://gitlab.com/coolercontrol/coolercontrol
+
+Package: coolercontrold
+Architecture: amd64 arm64
+Conflicts: coolercontrol-liqctld
+Replaces: coolercontrol-liqctld
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Recommends:
+ liquidctl,
+ lm-sensors,
+Description: Powerful cooling control and monitoring.
+ This is the system daemon for CoolerControl.
+ CoolerControl is an open-source application for monitoring and controlling supported cooling
+ devices. It features an intuitive interface, flexible control options, and live thermal data to keep
+ your system quiet, cool, and stable.
+
+# Package: coolercontrol
+# Architecture: amd64 arm64
+# Depends:
+#  coolercontrold (= ${binary:Version}),
+#  qt6-qpa-plugins,
+#  libqt6webenginecore6-bin,
+#  ${shlibs:Depends},
+#  ${misc:Depends},
+# Description: Powerful cooling control and monitoring.
+#  This is the desktop application for CoolerControl.
+#  CoolerControl is an open-source application for monitoring and controlling supported cooling
+#  devices. It features an intuitive interface, flexible control options, and live thermal data to keep
+#  your system quiet, cool, and stable.
