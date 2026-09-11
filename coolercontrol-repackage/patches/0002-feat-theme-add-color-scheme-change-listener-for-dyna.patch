@@ -1,0 +1,54 @@
+From 3390ef5e35d2cb5eafa1782525f0e10f301875d6 Mon Sep 17 00:00:00 2001
+From: joshuaboud <joshuaboud@hotmail.com>
+Date: Fri, 11 Sep 2026 15:58:55 -0300
+Subject: [PATCH 2/3] feat(theme): add color scheme change listener for dynamic
+ theme updates
+
+---
+ coolercontrol-ui/src/App.vue | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/coolercontrol-ui/src/App.vue b/coolercontrol-ui/src/App.vue
+index 9a3c8694..ae1f8111 100644
+--- a/coolercontrol-ui/src/App.vue
++++ b/coolercontrol-ui/src/App.vue
+@@ -10,7 +10,7 @@ import { sortEntitiesByTree } from '@/shell/libraryFolders.ts'
+ import { TOUR_STEPS } from '@/shell/tour.ts'
+ import { buildQtStrings } from '@/shell/qtStrings.ts'
+ import { useToolWizards } from '@/composables/useToolWizards.ts'
+-import { Ref, onMounted, ref, inject, nextTick } from 'vue'
++import { Ref, onMounted, onUnmounted, ref, inject, nextTick } from 'vue'
+ import { useDeviceStore } from '@/stores/DeviceStore'
+ import { useSettingsStore } from '@/stores/SettingsStore'
+ import { useCalibrationStore } from '@/stores/CalibrationStore'
+@@ -44,6 +44,12 @@ const settingsStore = useSettingsStore()
+ const calibrationStore = useCalibrationStore()
+ const daemonState = useDaemonState()
+ const emitter: Emitter<Record<EventType, any>> = inject('emitter')!
++const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: light)')
++const handleColorSchemeChange = (): void => {
++    if (settingsStore.themeMode === ThemeMode.SYSTEM) {
++        settingsStore.applyThemeMode()
++    }
++}
+ // True only when the app opened at the root URL (captured in main.ts before the
+ // router rewrote the hash); gates the configured-start-page redirect below.
+ const startedAtRoot = inject<boolean>('startedAtRoot', false)
+@@ -175,12 +181,14 @@ const onTourFinished = (): void => {
+ }
+ 
+ emitter.on('start-tour', startTour)
++onUnmounted(() => colorSchemeQuery.removeEventListener('change', handleColorSchemeChange))
+ 
+ /**
+  * This is the Startup procedure for the UI application:
+  */
+ onMounted(async () => {
+     deviceStore.connectToQtIPC()
++    colorSchemeQuery.addEventListener('change', handleColorSchemeChange)
+ 
+     // Add theme change event listener
+     window.addEventListener('theme-changed', () => {
+-- 
+2.52.0
+

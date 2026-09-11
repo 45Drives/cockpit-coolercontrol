@@ -27,6 +27,10 @@ Recommends:     lm_sensors
 Source0:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{project}-%{version}.tar.gz
 Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{name}-vendor-%{version}.tar.gz
 
+Patch: 0001-allow-embedding-in-cross-origin-iframe.patch
+Patch: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
+Patch: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
+
 %description
 This is the system daemon for CoolerControl.
 CoolerControl is an open-source application for monitoring and controlling supported cooling
@@ -34,7 +38,7 @@ devices. It features an intuitive interface, flexible control options, and live 
 your system quiet, cool, and stable.
 
 %prep
-%autosetup -n %{project}-%{version}/%{name} -a 0
+%autosetup -n %{project}-%{version}/%{name} -a 0 -p1
 tar -xzf %{SOURCE1}
 # brotli 8.0.4 ships .rs files with the exec bit set, so brp-mangle-shebangs reads their
 # leading `#![allow(...)]` as a shebang that does not start with '/' and fails the build.

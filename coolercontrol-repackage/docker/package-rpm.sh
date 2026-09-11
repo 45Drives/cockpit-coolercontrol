@@ -2,9 +2,10 @@
 
 set -euo pipefail
 
-cp -a /sources/* rpmbuild/SOURCES/
-
 shopt -s nullglob
+
+cp -a /sources/* /patches/* rpmbuild/SOURCES/
+
 for spec in rpmbuild/SPECS/*.spec; do
     echo "Installing $(basename "$spec" .spec) build dependencies"
     echo "####################################################"
@@ -14,10 +15,9 @@ for spec in rpmbuild/SPECS/*.spec; do
     echo "####################################################"
     rpmbuild -ba "$spec" --without check
 done
-shopt -u nullglob
 
 echo Done
 echo "####################################################"
 
-
+shopt -u nullglob
 cp -a rpmbuild/RPMS/* /out/

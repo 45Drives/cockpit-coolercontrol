@@ -74,6 +74,7 @@ for image in "${IMAGES[@]}"; do
         mkdir -p "out/$OS_NAME"
         docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" \
             --volume "$SCRIPT_DIR/sources:/sources:ro,z" \
+            --volume "$SCRIPT_DIR/patches:/patches:ro,z" \
             --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z" \
             --volume "$SCRIPT_DIR/debian:/debian:ro,z" \
             --volume "$SCRIPT_DIR/out/$OS_NAME:/out:rw,Z" \

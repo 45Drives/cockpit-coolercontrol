@@ -1,0 +1,61 @@
+From 0864985b9b92b25cf5924fa674a0e6d5c9db9848 Mon Sep 17 00:00:00 2001
+From: joshuaboud <joshuaboud@hotmail.com>
+Date: Fri, 11 Sep 2026 15:57:52 -0300
+Subject: [PATCH 1/3] allow embedding in cross-origin iframe
+
+---
+ coolercontrold/daemon/src/api/base.rs | 3 +--
+ coolercontrold/daemon/src/api/mod.rs  | 9 +--------
+ 2 files changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/coolercontrold/daemon/src/api/base.rs b/coolercontrold/daemon/src/api/base.rs
+index a1714325..f3db97e7 100644
+--- a/coolercontrold/daemon/src/api/base.rs
++++ b/coolercontrold/daemon/src/api/base.rs
+@@ -44,7 +44,6 @@ const CONTENT_SECURITY_POLICY: &str = "default-src 'self'; \
+     img-src 'self' blob: data:; \
+     font-src 'self' data:; \
+     connect-src 'self'; \
+-    frame-ancestors 'none'; \
+     object-src 'none'; \
+     base-uri 'self'; \
+     form-action 'self'";
+@@ -223,7 +222,7 @@ mod tests {
+         let csp_str = csp.to_str().unwrap();
+         assert!(csp_str.contains("default-src 'self'"));
+         assert!(csp_str.contains("script-src 'self' qrc:"));
+-        assert!(csp_str.contains("frame-ancestors 'none'"));
++        assert!(!csp_str.contains("frame-ancestors"));
+     }
+ 
+     #[tokio::test]
+diff --git a/coolercontrold/daemon/src/api/mod.rs b/coolercontrold/daemon/src/api/mod.rs
+index e7952fd3..2cba7288 100644
+--- a/coolercontrold/daemon/src/api/mod.rs
++++ b/coolercontrold/daemon/src/api/mod.rs
+@@ -380,10 +380,6 @@ async fn security_headers_middleware(req: Request, next: middleware::Next) -> Re
+         axum::http::header::X_CONTENT_TYPE_OPTIONS,
+         HeaderValue::from_static("nosniff"),
+     );
+-    headers.insert(
+-        axum::http::header::X_FRAME_OPTIONS,
+-        HeaderValue::from_static("SAMEORIGIN"),
+-    );
+     headers.insert(
+         HeaderName::from_static("referrer-policy"),
+         HeaderValue::from_static("strict-origin-when-cross-origin"),
+@@ -1787,10 +1783,7 @@ mod tests {
+             response.headers().get("x-content-type-options").unwrap(),
+             "nosniff"
+         );
+-        assert_eq!(
+-            response.headers().get("x-frame-options").unwrap(),
+-            "SAMEORIGIN"
+-        );
++        assert!(response.headers().get("x-frame-options").is_none());
+         assert_eq!(
+             response.headers().get("referrer-policy").unwrap(),
+             "strict-origin-when-cross-origin"
+-- 
+2.52.0
+

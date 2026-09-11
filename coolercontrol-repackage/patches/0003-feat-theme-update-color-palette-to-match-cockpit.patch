@@ -1,0 +1,62 @@
+From 97e6291de15d76b742cf4cffad35c738e1782f0c Mon Sep 17 00:00:00 2001
+From: joshuaboud <joshuaboud@hotmail.com>
+Date: Fri, 11 Sep 2026 15:59:07 -0300
+Subject: [PATCH 3/3] feat(theme): update color palette to match cockpit
+
+---
+ coolercontrol-ui/tailwind.config.js | 26 +++++++++++++-------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/coolercontrol-ui/tailwind.config.js b/coolercontrol-ui/tailwind.config.js
+index f9190866..31928f80 100644
+--- a/coolercontrol-ui/tailwind.config.js
++++ b/coolercontrol-ui/tailwind.config.js
+@@ -152,16 +152,16 @@ module.exports = {
+                     // mediaQuery: '@media (prefers-color-scheme: light)',
+                     extend: {
+                         colors: {
+-                            accent: '#4d8cff',
++                            accent: '#92c5f9',
+                             // The brand magenta washes out on a light ground, so it
+                             // deepens within its own hue, as success/warning do below.
+-                            'accent-gradient-to': '#cc00cc',
+-                            'bg-one': '#f5f6f9',
+-                            'bg-two': '#dfe0e0',
+-                            'border-one': '#3c454d',
++                            'accent-gradient-to': '#92c5f9',
++                            'bg-one': '#ffffff',
++                            'bg-two': '#f2f2f2',
++                            'border-one': '#c7c7c7',
+                             'surface-hover': 'rgba(0, 0, 0, 0.05)',
+-                            'text-color': '#495057',
+-                            'text-color-secondary': '#6c757d',
++                            'text-color': 'rgb(21, 21, 21)',
++                            'text-color-secondary': 'rgb(112, 112, 112)',
+                             white: '#f5f6f9',
+                             pink: '#ff007f',
+                             green: '#00ff7f',
+@@ -187,15 +187,15 @@ module.exports = {
+                     // mediaQuery: '@media (prefers-color-scheme: dark)',
+                     extend: {
+                         colors: {
+-                            accent: '#4d8cff',
+-                            'accent-gradient-to': '#ff21ff',
+-                            'bg-one': '#1b1e23',
+-                            'bg-two': '#2c313c',
++                            accent: '#92c5f9',
++                            'accent-gradient-to': '#92c5f9',
++                            'bg-one': '#292929',
++                            'bg-two': '#151515',
+                             // 'border-one': '#343b48',
+                             'border-one': '#484d5a',
+                             'surface-hover': 'rgba(255, 255, 255, 0.05)',
+-                            'text-color': '#dce1ec',
+-                            'text-color-secondary': '#8a95aa',
++                            'text-color': '#ffffff',
++                            'text-color-secondary': 'rgb(199, 199, 199)',
+                             white: '#f5f6f9',
+                             pink: '#ff007f',
+                             green: '#00ff7f',
+-- 
+2.52.0
+
