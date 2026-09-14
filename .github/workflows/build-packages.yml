@@ -35,11 +35,25 @@ jobs:
           manifest: ${{ needs.prebuild.outputs.manifest }}
           build: ${{ toJSON(matrix.build) }}
           uuid: ${{ needs.prebuild.outputs.uuid }}
+  
+  repackage-coolercontrold:
+    needs:
+      - prebuild
+      - build
+    runs-on: buildinator-group
+    steps:
+      - name: build-coolercontrold
+        run: |
+          set -euo pipefail
+          coolercontrol-repackage/build-coolercontrold.sh
+          cp -dR --preserve=mode coolercontrol-repackage/out/* \
+            /mnt/ci_artifacts/${{ needs.prebuild.outputs.uuid }}/output/
 
   sign:
     needs:
       - prebuild
       - build
+      - repackage-coolercontrold
     runs-on: buildinator-5
     steps:
       - name: Run sign playbook

@@ -15,6 +15,8 @@ RUN dnf install -y \
     epel-release \
     && dnf clean all
 
+RUN dnf module reset nodejs -y && dnf module enable nodejs:22 -y && dnf install nodejs -y
+
 # Create a non-privileged user for building
 RUN useradd -u 1000 -m rpmbuilder
 RUN usermod -aG wheel rpmbuilder

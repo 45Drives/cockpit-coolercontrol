@@ -59,7 +59,7 @@ done
 mkdir -p sources out log
 
 shopt -s nullglob
-for spec in rpmbuild/SPECS/*.spec; do
+for spec in *.spec; do
     echo "Pulling $(basename "$spec" .spec) sources"
     docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" --volume "./$spec:/$spec:ro,z" --volume "./sources:/out:rw,z" cockpit-coolercontrol-builder-rockylinux-9 spectool --get-files --directory /out "/$spec"
 done
@@ -69,12 +69,24 @@ RESULT=0
 
 JOBS=()
 
+kill_jobs() {
+    for job in "${JOBS[@]}"; do
+        pid="${job%%:*}"
+        OS_NAME="${job#*:}"
+        if kill "$pid" 2>/dev/null; then
+            wait "$pid"
+        fi
+    done
+}
+
+trap 'kill_jobs' EXIT
+
 for image in "${IMAGES[@]}"; do
     OS_NAME=${image#cockpit-coolercontrol-builder-}
     echo "starting build for $OS_NAME"
     (
         mkdir -p "out/$OS_NAME"
-        docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" \
+        docker run "${CONTAINER_RUN_OPTIONS[@]}" \
             --volume "$SCRIPT_DIR/sources:/sources:ro,z" \
             --volume "$SCRIPT_DIR/patches:/patches:ro,z" \
             --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z" \
@@ -98,6 +110,7 @@ for job in "${JOBS[@]}"; do
         echo "Build failed for $OS_NAME" >&2
         cat log/"$OS_NAME.log" >&2
     fi
+    JOBS=( "${JOBS[@]/$job}" )
 done
 
 exit $RESULT

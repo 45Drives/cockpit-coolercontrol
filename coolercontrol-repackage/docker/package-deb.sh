@@ -5,17 +5,18 @@ set -euo pipefail
 DEBIAN_VERSION=$(cd / && dpkg-parsechangelog --show-field Version)
 UPSTREAM_VERSION=${DEBIAN_VERSION#*:}
 UPSTREAM_VERSION=${UPSTREAM_VERSION%-*}
+CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
 echo "Version: $DEBIAN_VERSION (upstream: $UPSTREAM_VERSION)"
 
 rm -rf build
 mkdir -p build
 ln -sf "/sources/coolercontrol-$UPSTREAM_VERSION.tar.gz" \
     "coolercontrol_$UPSTREAM_VERSION.orig.tar.gz"
-ln -sf "/sources/coolercontrold-vendor-$UPSTREAM_VERSION.tar.gz" \
-    "coolercontrol_$UPSTREAM_VERSION.orig-cargo-vendor.tar.gz"
 tar -xf /sources/coolercontrol-"$UPSTREAM_VERSION".tar.gz --strip-components=1 --directory build
-mkdir -p build/cargo-vendor
-tar -xf /sources/coolercontrold-vendor-"$UPSTREAM_VERSION".tar.gz --directory build/cargo-vendor
+
+ln -sf "/sources/coolercontrold-vendor-$UPSTREAM_VERSION.tar.gz" \
+        "build/coolercontrold-vendor-$UPSTREAM_VERSION.tar.gz"
+
 rm -rf build/debian
 cp -a /debian build/debian
 cp -a /patches build/debian/patches
@@ -27,13 +28,6 @@ while read -r patch _; do
         exit 1
     }
 done < build/debian/patches/series
-
-CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
-
-if [[ "$CODENAME" == "focal" ]]; then
-    sed -i "s/debhelper-compat (= 13)/debhelper-compat (= 12)/g" build/debian/control
-    sed -i "s/cargo (>= 1.88) \| cargo-1.91 \| cargo-1.88/cargo-1.80/g" build/debian/control
-fi
 
 echo Installing build dependencies
 echo "####################################################"

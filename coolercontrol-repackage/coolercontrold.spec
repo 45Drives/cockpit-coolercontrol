@@ -6,7 +6,7 @@
 
 Name:           %{project}d
 Version:        5.0.0
-Release:        45d%{?autorelease}%{!?autorelease:0%{?dist}}
+Release:        45d%{?autorelease}%{!?autorelease:1%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
 ExclusiveArch:  x86_64 aarch64
@@ -21,6 +21,8 @@ BuildRequires:  protobuf-compiler
 # BuildRequires:  rpm_macro(cargo_build)
 BuildRequires:  pkgconfig(libdrm_amdgpu)
 BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  nodejs
+BuildRequires:  npm
 Recommends:     python3-liquidctl
 Recommends:     lm_sensors
 
@@ -30,7 +32,6 @@ Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/d
 Patch: 0001-allow-embedding-in-cross-origin-iframe.patch
 Patch: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
 Patch: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
-Patch: 0004-Cargo.toml-opt-in-to-edition2024-feature-for-focal-b.patch
 
 %description
 This is the system daemon for CoolerControl.
@@ -39,7 +40,10 @@ devices. It features an intuitive interface, flexible control options, and live 
 your system quiet, cool, and stable.
 
 %prep
-%autosetup -n %{project}-%{version}/%{name} -a 0 -p1
+%autosetup -n %{project}-%{version}/%{name} -a 0 -N
+pushd ..
+%autopatch -p1
+popd
 tar -xzf %{SOURCE1}
 # brotli 8.0.4 ships .rs files with the exec bit set, so brp-mangle-shebangs reads their
 # leading `#![allow(...)]` as a shebang that does not start with '/' and fails the build.
@@ -49,6 +53,10 @@ find vendor -type f -name '*.rs' -exec chmod a-x {} +
 %{?generate_buildrequires}
 
 %build
+pushd ..
+make build-ui
+popd
+make sync-app
 %cargo_build
 %{?cargo_license_summary}
 %{?cargo_license:%{cargo_license} > LICENSE.dependencies}

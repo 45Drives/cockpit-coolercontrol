@@ -1,12 +1,9 @@
 #!/usr/bin/make -f
 
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 export APP_ID=org.coolercontrol.CoolerControl
-export CARGO_HOME=$(CURDIR)/cargo-vendor/.cargo
-export CARGO_NET_OFFLINE=true
-CARGO := $(shell command -v cargo || command -v cargo-1.91 || command -v cargo-1.88 || command -v cargo-1.80)
 
 %:
 	dh $@
@@ -16,29 +13,26 @@ override_dh_auto_configure:
 	dh_auto_configure
 # 	dh_auto_configure --buildsystem=cmake --sourcedirectory=coolercontrol
 
-override_dh_auto_clean:
-	rm -rf coolercontrold/target
-
-override_dh_clean:
-	dh_clean -Xcargo-vendor
-
 override_dh_auto_build:
-	@if [ ! -d cargo-vendor/vendor ]; then \
-		dh_auto_build --sourcedirectory=coolercontrol-ui ;\
+	@vendor_tar=$$(ls coolercontrold-vendor*.tar.gz 2>/dev/null | head -n1); \
+	if [ -n "$$vendor_tar" ]; then \
+		tar xf "$$vendor_tar" >/dev/null 2>&1 ;\
 	fi
+	dh_auto_build --sourcedirectory=coolercontrol-ui
 # 	dh_auto_build --buildsystem=cmake --sourcedirectory=coolercontrol
-	dh_auto_build --sourcedirectory=coolercontrold -- CARGO=$(CARGO)
+	dh_auto_build --sourcedirectory=coolercontrold
 
 override_dh_auto_test:
-	@if [ ! -d cargo-vendor/vendor ]; then \
+	@vendor_tar=$$(ls coolercontrold-vendor*.tar.gz 2>/dev/null | head -n1); \
+	if [ -z "$$vendor_tar" ]; then \
 		dh_auto_test --sourcedirectory=coolercontrol-ui ;\
 	fi
-	dh_auto_test --sourcedirectory=coolercontrold -- CARGO=$(CARGO)
+	dh_auto_test --sourcedirectory=coolercontrold
 	@coolercontrold/target/release/coolercontrold --version
 # 	dh_auto_test --sourcedirectory=coolercontrol
 
 override_dh_auto_install:
-	dh_auto_install --sourcedirectory=coolercontrold
+	dh_auto_install --sourcedirectory=coolercontrold --destdir=$(CURDIR)/debian/tmp
 # 	dh_auto_install --buildsystem=cmake --sourcedirectory=coolercontrol
 	@$(eval DESTDIR=$(CURDIR)/debian/tmp)
 # 	@install -Dm 644 packaging/metadata/$(APP_ID).desktop -t $(DESTDIR)/usr/share/applications/
