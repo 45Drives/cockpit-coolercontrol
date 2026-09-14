@@ -14,9 +14,13 @@ License:        GPL-3.0-or-later AND OFL-1.1
 URL:            https://gitlab.com/%{project}/%{project}
 
 BuildRequires:  systemd-rpm-macros
-BuildRequires:  cargo-rpm-macros
 BuildRequires:  cargo
+%if 0%{?rhel} == 8
+BuildRequires:  rust
+%else
+BuildRequires:  cargo-rpm-macros
 BuildRequires:  rust-packaging
+%endif
 BuildRequires:  protobuf-compiler
 # BuildRequires:  rpm_macro(cargo_build)
 BuildRequires:  pkgconfig(libdrm_amdgpu)
@@ -29,9 +33,9 @@ Recommends:     lm_sensors
 Source0:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{project}-%{version}.tar.gz
 Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{name}-vendor-%{version}.tar.gz
 
-Patch: 0001-allow-embedding-in-cross-origin-iframe.patch
-Patch: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
-Patch: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
+Patch0: 0001-allow-embedding-in-cross-origin-iframe.patch
+Patch1: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
+Patch2: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
 
 %description
 This is the system daemon for CoolerControl.
@@ -48,7 +52,18 @@ tar -xzf %{SOURCE1}
 # brotli 8.0.4 ships .rs files with the exec bit set, so brp-mangle-shebangs reads their
 # leading `#![allow(...)]` as a shebang that does not start with '/' and fails the build.
 find vendor -type f -name '*.rs' -exec chmod a-x {} +
+%if 0%{?rhel} == 8
+mkdir -p .cargo
+cat > .cargo/config.toml <<'EOF'
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+EOF
+%else
 %{?cargo_prep:%cargo_prep -v vendor}
+%endif
 
 %{?generate_buildrequires}
 
@@ -57,21 +72,33 @@ pushd ..
 make build-ui
 popd
 make sync-app
+%if 0%{?rhel} == 8
+CARGO_PROFILE_RELEASE_DEBUG=2 cargo build --release --locked --offline
+%else
 %cargo_build
 %{?cargo_license_summary}
 %{?cargo_license:%{cargo_license} > LICENSE.dependencies}
 %{?cargo_vendor_manifest}
+%endif
 
 %install
 install -Dpm 644 systemd/%{name}.service -t %{buildroot}%{_unitdir}
 install -Dpm 644 man/%{name}.8 -t %{buildroot}%{_mandir}/man8
+%if 0%{?rhel} == 8
+install -Dpm 755 target/release/%{name} %{buildroot}%{_bindir}/%{name}
+%else
 pushd daemon
 %cargo_install
 popd
+%endif
 
 %if %{with check}
 %check
+%if 0%{?rhel} == 8
+cargo test --release --locked --offline --no-fail-fast
+%else
 %cargo_test
+%endif
 %{buildroot}%{_bindir}/%{name} --version
 %endif
 

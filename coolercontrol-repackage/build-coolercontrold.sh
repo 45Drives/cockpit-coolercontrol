@@ -6,6 +6,8 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 cd "$SCRIPT_DIR" || exit $?
 
+IMAGE_PREFIX="cockpit-coolercontrol-builder-"
+
 if command -v podman >/dev/null 2>&1; then
     CONTAINER_ENGINE=podman
     CONTAINER_RUN_OPTIONS=(--userns=keep-id)
@@ -20,7 +22,16 @@ docker() {
     "$CONTAINER_ENGINE" "$@"
 }
 
-IMAGES=()
+TARGETS=()
+for dockerfile in ./docker/*.dockerfile; do
+    TARGET="${dockerfile#./docker/}"
+    TARGET="${TARGET%.dockerfile}"
+    if [[ -z "$*" ]] || { printf '%s\0' "$@" | grep -F -x -z -q -- "$TARGET"; }; then
+        TARGETS+=("$TARGET")
+    fi
+done
+
+echo Building for targets: "${TARGETS[@]}"
 
 cat <<EOF
 ################################
@@ -30,20 +41,15 @@ EOF
 
 build_pids=()
 
-for dockerfile in ./docker/*.dockerfile; do
-    IMAGE="${dockerfile#./docker/}"
-    IMAGE="${IMAGE%.dockerfile}"
-    IMAGE="cockpit-coolercontrol-builder-$IMAGE"
+for target in "${TARGETS[@]}"; do
     (
-    echo "building $IMAGE..."
-    docker build --pull -t "$IMAGE" --file "$dockerfile" ./docker # >/dev/null 2>&1
+    echo "building $IMAGE_PREFIX$target..."
+    docker build --pull -t "$IMAGE_PREFIX$target" --file "./docker/$target.dockerfile" ./docker # >/dev/null 2>&1
     result=$?
-    echo "$IMAGE done ($result)"
+    echo "$IMAGE_PREFIX$target done ($result)"
     exit $result
     ) &
     build_pids+=($!)
-
-    IMAGES+=("$IMAGE")
 done
 
 for pid in "${build_pids[@]}"; do
@@ -61,7 +67,7 @@ mkdir -p sources out log
 shopt -s nullglob
 for spec in *.spec; do
     echo "Pulling $(basename "$spec" .spec) sources"
-    docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" --volume "./$spec:/$spec:ro,z" --volume "./sources:/out:rw,z" cockpit-coolercontrol-builder-rockylinux-9 spectool --get-files --directory /out "/$spec"
+    docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" --volume "./$spec:/$spec:ro,z" --volume "./sources:/out:rw,z" "$IMAGE_PREFIX"rocky-el9 spectool --get-files --directory /out "/$spec"
 done
 shopt -u nullglob
 
@@ -72,7 +78,6 @@ JOBS=()
 kill_jobs() {
     for job in "${JOBS[@]}"; do
         pid="${job%%:*}"
-        OS_NAME="${job#*:}"
         if kill "$pid" 2>/dev/null; then
             wait "$pid"
         fi
@@ -81,34 +86,33 @@ kill_jobs() {
 
 trap 'kill_jobs' EXIT
 
-for image in "${IMAGES[@]}"; do
-    OS_NAME=${image#cockpit-coolercontrol-builder-}
-    echo "starting build for $OS_NAME"
+for target in "${TARGETS[@]}"; do
+    echo "starting build for $target"
     (
-        mkdir -p "out/$OS_NAME"
+        mkdir -p "out/$target"
         docker run "${CONTAINER_RUN_OPTIONS[@]}" \
             --volume "$SCRIPT_DIR/sources:/sources:ro,z" \
             --volume "$SCRIPT_DIR/patches:/patches:ro,z" \
             --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z" \
             --volume "$SCRIPT_DIR/debian:/debian:ro,z" \
-            --volume "$SCRIPT_DIR/out/$OS_NAME:/out:rw,Z" \
-            "$image" > "log/$OS_NAME.log" 2>&1 
+            --volume "$SCRIPT_DIR/out/$target:/out:rw,Z" \
+            "$IMAGE_PREFIX$target" > "log/$target.log" 2>&1 
         result=$?
-        echo "$OS_NAME exited $result"
+        echo "$target exited $result"
         exit $result
     ) &
-    JOBS+=("$!:$OS_NAME")
+    JOBS+=("$!:$target")
 done
 
 for job in "${JOBS[@]}"; do
     pid="${job%%:*}"
-    OS_NAME="${job#*:}"
+    target="${job#*:}"
     if wait "$pid"; then
-        echo "Build succeeded for $OS_NAME"
+        echo "Build succeeded for $target"
     else
         RESULT=$?
-        echo "Build failed for $OS_NAME" >&2
-        cat log/"$OS_NAME.log" >&2
+        echo "Build failed for $target" >&2
+        cat log/"$target.log" >&2
     fi
     JOBS=( "${JOBS[@]/$job}" )
 done
