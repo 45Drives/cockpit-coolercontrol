@@ -1,0 +1,71 @@
+{
+    "schema_version": "45D_AP_V2.0",
+    "name": "cockpit-coolercontrol",
+    "title": "Cockpit Coolercontrol",
+    "description": "Cockpit wrapper plugin for Coolercontrol webui",
+    "version": "1.0.0",
+    "build_number": "1",
+    "stable": true,
+    "author": "Josh Boudreau <jboudreau@45drives.com>",
+    "git_url": "https://github.com/45Drives/cockpit-coolercontrol",
+    "license": "GPL-3.0+",
+    "architecture": {
+        "ubuntu": "all",
+        "rocky": "noarch",
+        "debian": "all"
+    },
+    "defaults": {
+        "change_urgency": "medium"
+    },
+    "dependencies": {
+        "ubuntu_common": [
+            "cockpit-bridge",
+            "coolercontrold (>= 5.0.0-45d1)",
+            "coolercontrold (<< 5.0.1~)"
+        ],
+        "rocky_common": [
+            "cockpit-bridge",
+            "coolercontrold >= 5.0.0-45d0",
+            "coolercontrold < 5.0.1"
+        ]
+    },
+    "builds": [
+        {
+            "group": "debian",
+            "os_name": "debian-bookworm",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
+        },
+        {
+            "group": "debian",
+            "os_name": "debian-trixie",
+            "image": "ci.cr.45d.io/ci/simple/debian-trixie:1"
+        },
+        {
+            "group": "ubuntu",
+            "os_name": "ubuntu-jammy",
+            "image": "ci.cr.45d.io/ci/simple/ubuntu-jammy:1"
+        },
+        {
+            "group": "rocky",
+            "os_name": "rocky-el8",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el8:1"
+        },
+        {
+            "group": "rocky",
+            "os_name": "rocky-el9",
+            "image": "ci.cr.45d.io/ci/simple/rocky-el9:1"
+        }
+    ],
+    "repos": [
+        "community",
+        "enterprise"
+    ],
+    "changelog": {
+        "urgency": "medium",
+        "version": "4.6.1",
+        "build_number": "2",
+        "date": null,
+        "packager": "Josh Boudreau <jboudreau@45drives.com>",
+        "changes": []
+    }
+}

@@ -1,0 +1,31 @@
+Name: {{ name }}
+Version: {{ version }}
+Release: {{ build_number }}%{?dist}
+Summary: {{ description }}
+License: {{ license }}
+URL: {{ git_url }}
+Source0: %{name}-%{version}.tar.gz
+BuildArch: {{ architecture.rocky }}
+Requires: {{ dependencies.rocky_common | join(',') }}
+
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+%description
+{{ title }}
+{{ description }}
+
+%prep
+%setup -q
+
+%build
+make OS_PACKAGE_RELEASE=el8
+
+%install
+make DESTDIR=%{buildroot} OS_PACKAGE_RELEASE=el8 install
+
+%files
+/usr/share/cockpit/coolercontrol/*
+/etc/systemd/system/coolercontrold.service.d/cockpit-coolercontrol.conf
+
+%changelog
