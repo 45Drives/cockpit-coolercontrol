@@ -61,4 +61,5 @@ artifacts=(
     ./*.debian.tar.*
     ./*.orig.tar.*
 )
-cp -aL "${artifacts[@]}" /out/
+mkdir -p /out/debs
+cp -aL "${artifacts[@]}" /out/debs

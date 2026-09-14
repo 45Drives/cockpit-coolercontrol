@@ -20,4 +20,6 @@ echo Done
 echo "####################################################"
 
 shopt -u nullglob
-cp -a rpmbuild/RPMS/* /out/
+mkdir -p /out/rpms /out/srpms
+cp -a rpmbuild/RPMS/* /out/rpms/
+cp -a rpmbuild/SRPMS/* /out/srpms/
