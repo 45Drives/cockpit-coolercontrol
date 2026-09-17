@@ -5,8 +5,8 @@
 %global cargo_install_lib 0
 
 Name:           %{project}d
-Version:        5.0.0
-Release:        45d%{?autorelease}%{!?autorelease:1%{?dist}}
+Version:        5.0.1
+Release:        45d%{?autorelease}%{!?autorelease:2%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
 ExclusiveArch:  x86_64 aarch64
@@ -124,8 +124,11 @@ cargo test --release --locked --offline --no-fail-fast
 %systemd_postun_with_restart %{name}.service
 
 %changelog
-* Fri Sep 11 2026 Josh Boudreau <jboudreau@45drives.com> - 5.0.0-45d1
+* Thu Sep 17 2026 Josh Boudreau <jboudreau@45drives.com> - 5.0.1-45d1
 - Apply 45Drives integration patches.
+
+* Wed Sep 16 2026 Guy Boldon <gb@guyboldon.com> - 5.0.1-1
+- 5.0.1 Release
 
 * Sun Sep 06 2026 Guy Boldon <gb@guyboldon.com> - 5.0.0-1
 - 5.0.0 Release

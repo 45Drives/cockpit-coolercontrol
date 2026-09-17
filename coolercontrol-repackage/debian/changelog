@@ -1,8 +1,14 @@
-coolercontrol (5.0.0-45d1UNRELEASED) UNRELEASED; urgency=medium
+coolercontrol (5.0.1-45d1UNRELEASED) UNRELEASED; urgency=medium
 
   * Apply 45Drives integration patches.
 
- -- Josh Boudreau <jboudreau@45drives.com>  Fri, 11 Sep 2026 16:00:00 -0300
+ -- Josh Boudreau <jboudreau@45drives.com>  Thu, 17 Sep 2026 16:26:00 -0300
+
+coolercontrol (5.0.1) UNRELEASED; urgency=medium
+
+  * 5.0.1 Release
+
+ -- Guy Boldon <gb@guyboldon.com>  Wed, 16 Sep 2026 20:05:55 +0000
 
 coolercontrol (5.0.0) UNRELEASED; urgency=medium
 

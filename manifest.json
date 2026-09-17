@@ -20,13 +20,13 @@
     "dependencies": {
         "ubuntu_common": [
             "cockpit-bridge",
-            "coolercontrold (>= 5.0.0-45d1)",
-            "coolercontrold (<< 5.0.1~)"
+            "coolercontrold (>= 5.0.1-45d1)",
+            "coolercontrold (<< 5.0.2~)"
         ],
         "rocky_common": [
             "cockpit-bridge",
-            "coolercontrold >= 5.0.0-45d1",
-            "coolercontrold < 5.0.1"
+            "coolercontrold >= 5.0.1-45d1",
+            "coolercontrold < 5.0.2"
         ]
     },
     "builds": [
