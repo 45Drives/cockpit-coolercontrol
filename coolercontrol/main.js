@@ -184,27 +184,31 @@ async function daemonResponsive() {
       method: "GET",
     });
     return response.ok;
-  } catch {
+  } catch (e) {
+    console.error(e);
     return false;
   }
 }
 
 async function waitForDaemonResponse() {
   pushError(_("Waiting for daemon response"));
+  document.body.style.cursor = "wait";
   let seconds = 0;
   await new Promise((resolve) => {
     const interval = window.setInterval(async () => {
-      displayError(_("Waiting for service") + ".".repeat((seconds++ % 20) + 1));
+      displayError(
+        _("Waiting for daemon response") + ".".repeat((seconds++ % 20) + 1),
+      );
       if (await daemonResponsive()) {
         window.clearInterval(interval);
         resolve();
       }
     }, 1000);
   });
+  document.body.style.cursor = undefined;
   popError();
 }
 
-let resolvedAfterServiceStart = undefined;
 async function startService(enable) {
   await requireAdministrativeAccess();
   await cockpit.spawn(
@@ -217,7 +221,13 @@ async function startService(enable) {
       superuser: "require",
     },
   );
-  resolvedAfterServiceStart?.();
+}
+
+async function stopService() {
+  await requireAdministrativeAccess();
+  await cockpit.spawn(["systemctl", "stop", "coolercontrold"], {
+    superuser: "require",
+  });
 }
 
 async function promptToStartService() {
@@ -236,14 +246,195 @@ async function promptToStartService() {
   );
   const startButton = document.getElementById("startServiceButton");
   const enableButton = document.getElementById("enableServiceButton");
-  startButton.onclick = () => startService();
-  enableButton.onclick = () => startService(true);
   enableButton.hidden = enabled;
-  await new Promise((resolve) => (resolvedAfterServiceStart = resolve));
+  await new Promise((resolve) => {
+    startButton.onclick = () => {
+      resolve();
+      startService();
+    };
+    enableButton.onclick = () => {
+      resolve();
+      startService(true);
+    };
+  });
+  popError();
+}
+
+async function ensureCorsConfig() {
+  /**
+   *
+   * @param {string} config full config text
+   * @param {string} section desired section name
+   */
+  const tomlGetSectionBounds = (config, section) => {
+    const headerMatch = new RegExp(`^\\[${section}\\].*$`, "m").exec(config);
+    if (headerMatch === null) {
+      return null;
+    }
+    const sectionStart = headerMatch.index + headerMatch[0].length;
+    const sectionEnd = config.indexOf("\n[", sectionStart);
+    if (sectionEnd === -1) {
+      return [sectionStart, config.length];
+    }
+    return [sectionStart, sectionEnd];
+  };
+  /**
+   *
+   * @param {string} config full config text
+   * @param {string} section desired section name
+   */
+  const tomlGetSection = (config, section) => {
+    const result = tomlGetSectionBounds(config, section);
+    if (result === null) {
+      return null;
+    }
+    const [start, end] = result;
+    return config.slice(start, end);
+  };
+  /**
+   *
+   * @param {string} config full config text
+   * @param {string} section desired section name
+   * @param {string} newContent replacement text for section
+   */
+  const tomlSetSection = (config, section, newContent) => {
+    const result = tomlGetSectionBounds(config, section);
+    const [start, end] =
+      result === null ? [config.length, config.length] : result;
+    return (
+      config.slice(0, start) +
+      (result === null ? `[${section}]\n` : "") +
+      newContent +
+      config.slice(end)
+    );
+  };
+  /**
+   *
+   * @param {string} config full config text
+   * @param {string} section desired section name
+   * @param {(content: string) => string} replacer callback
+   */
+  const tomlModifySection = (config, section, replacer) => {
+    return tomlSetSection(
+      config,
+      section,
+      replacer(tomlGetSection(config, section) ?? ""),
+    );
+  };
+  const containsCorsOrigin = (config) => {
+    const settingsText = tomlGetSection(config, "settings");
+    if (!settingsText) {
+      return false;
+    }
+    const originsLine = /^origins\s*=\s*(?<array>\[[^\]]+\])/m.exec(
+      settingsText,
+    );
+    if (!originsLine) {
+      return false;
+    }
+    /**
+     * @type {Array<string>}
+     */
+    const origins = JSON.parse(originsLine.groups["array"]);
+    console.log("origins:", origins);
+    return origins.includes(cockpit.transport.origin);
+  };
+  const file = cockpit.file("/etc/coolercontrol/config.toml", {
+    superuser: "try",
+  });
+  const containsOrigin = await file
+    .read()
+    .then(async (content) => {
+      if (content === null) {
+        // config DNE, create it
+        await requireAdministrativeAccess();
+        pushError(_("First time config setup..."));
+        const proc = cockpit.script(
+          `
+coproc DAEMON { exec coolercontrold 2>&1; }
+daemon_pid=$DAEMON_PID
+(
+  sleep 20
+  echo Force killing coolercontrold after timeout
+  kill "$daemon_pid" 2>/dev/null
+) &
+timeout_pid=$!
+
+while IFS= read -r line; do
+  printf '%s\n' "$line"
+
+  if [[ $line == *"Configuration file check successful"* ]]; then
+    echo Killing daemon
+    kill "$daemon_pid" 2>/dev/null
+  fi
+done <&"\${DAEMON[0]}"
+
+kill "$timeout_pid" 2>/dev/null || true
+wait "$daemon_pid" 2>/dev/null || true
+wait "$timeout_pid" 2>/dev/null || true
+          `,
+          [],
+          {
+            superuser: "require",
+          },
+        );
+        proc.stream((output) => console.log(output));
+        await proc;
+        popError();
+        return await file.read();
+      }
+      return content;
+    })
+    .then((content) => containsCorsOrigin(content))
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
+  if (containsOrigin) {
+    console.log("CORS configured properly");
+    return;
+  }
+  await requireAdministrativeAccess();
+  console.log("Configuring CORS");
+  pushError(_("Configuring CORS..."));
+  const serviceWasActive = await serviceIsActive();
+  if (serviceWasActive) {
+    await stopService();
+  }
+  await file.modify((config) => {
+    return tomlModifySection(config, "settings", (settingsText) => {
+      let originsLine = /^origins\s*=\s*(?<array>\[[^\]]+\]).*$/m.exec(
+        settingsText,
+      );
+      if (!originsLine) {
+        const newOriginsLineText = `
+origins = [${JSON.stringify(cockpit.transport.origin)}]
+`;
+        const originsLineCommentRe = /^#\s*origins\s*=\s*\[.*$/m;
+        if (originsLineCommentRe.test(settingsText)) {
+          return settingsText.replace(originsLineCommentRe, newOriginsLineText);
+        }
+        return settingsText + newOriginsLineText;
+      }
+      /**
+       * @type {Array<string>}
+       */
+      const origins = JSON.parse(originsLine.groups["array"]);
+      origins.push(cockpit.transport.origin);
+      return settingsText.replace(
+        originsLine[0],
+        `origins = ${JSON.stringify(origins)}`,
+      );
+    });
+  });
+  if (serviceWasActive) {
+    await startService();
+  }
   popError();
 }
 
 async function loadIframe() {
+  await ensureCorsConfig();
   if (!(await daemonResponsive())) {
     if (!(await serviceIsActive())) {
       await promptToStartService();
@@ -261,6 +452,7 @@ async function loadIframe() {
 
 function updateColorScheme() {
   const theme = cockpit.theme;
+  console.log("updating theme to", theme);
   if (theme === "light" || theme === "dark") {
     iframe.style.colorScheme = theme;
   } else {
