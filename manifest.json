@@ -3,9 +3,9 @@
     "name": "cockpit-coolercontrol",
     "title": "Cockpit Coolercontrol",
     "description": "Cockpit wrapper plugin for Coolercontrol webui",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "build_number": "1",
-    "stable": true,
+    "stable": false,
     "author": "Josh Boudreau <jboudreau@45drives.com>",
     "git_url": "https://github.com/45Drives/cockpit-coolercontrol",
     "license": "GPL-3.0+",
@@ -25,7 +25,7 @@
         ],
         "rocky_common": [
             "cockpit-bridge",
-            "coolercontrold >= 5.0.0-45d0",
+            "coolercontrold >= 5.0.0-45d1",
             "coolercontrold < 5.0.1"
         ]
     },
@@ -62,8 +62,8 @@
     ],
     "changelog": {
         "urgency": "medium",
-        "version": "4.6.1",
-        "build_number": "2",
+        "version": "1.0.1",
+        "build_number": "1",
         "date": null,
         "packager": "Josh Boudreau <jboudreau@45drives.com>",
         "changes": []
