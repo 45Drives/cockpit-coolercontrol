@@ -15,7 +15,5 @@ Description: {{ description }}
 Package: 45d-fancontrol
 Architecture: all
 Depends: {{ name }} (= {{ version }})
-Recommends: ipmi-hwmon
-Recommends: drivetemp
-Recommends: ipmb-bus
+Recommends: ipmi-hwmon, drivetemp, ipmb-bus
 Description: Meta package for fan control on 45Drives servers: pulls in {{ name }}, ipmi-hwmon, and drivetemp.

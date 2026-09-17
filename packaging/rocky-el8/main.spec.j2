@@ -18,9 +18,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 %package -n 45d-fancontrol
 Summary: Meta package for fan control on 45Drives servers
 Requires: %{name} = %{version}-%{release}
-Recommends: ipmi-hwmon
-Recommends: drivetemp
-Recommends: ipmb-bus
+Recommends: ipmi-hwmon, drivetemp, ipmb-bus
 %description -n 45d-fancontrol
 Meta package for fan control on 45Drives servers: pulls in %{name}, ipmi-hwmon, and drivetemp.
 
