@@ -45,6 +45,7 @@ jobs:
       - name: build-coolercontrold
         run: |
           set -euo pipefail
+          cd ${{ github.workspace }}
           coolercontrol-repackage/build-coolercontrold.sh
           cp -dR --preserve=mode coolercontrol-repackage/out/* \
             /mnt/ci_artifacts/${{ needs.prebuild.outputs.uuid }}/output/
