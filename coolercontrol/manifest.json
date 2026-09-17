@@ -1,6 +1,6 @@
 {
   "version": 1.0,
-  "content-security-policy": "script-src 'self'; connect-src 'self' https://*:11987 http://*:11987; frame-src 'self' https://*:11987 http://*:11987",
+  "content-security-policy": "default-src 'self' https://*:11987; script-src 'self'; connect-src 'self' https://*:11987; frame-src 'self' https://*:11987",
   "menu": {
     "coolercontrol": {
       "label": "Coolercontrol",
