@@ -51,6 +51,8 @@ RUN mkdir -p /tmp/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS} \
     && rm -rf /tmp/rpmbuild \
     && dnf clean all
 
+RUN for i in /opt/cargo/bin/*; do ln -snf $i /usr/bin/$(basename $i); done
+
 # Create a non-privileged user for building
 RUN useradd -u 1000 -m rpmbuilder
 RUN usermod -aG wheel rpmbuilder
