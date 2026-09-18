@@ -7,6 +7,7 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 cd "$SCRIPT_DIR" || exit $?
 
 mkdir -p sources out log
+chmod 777 sources out log
 
 IMAGE_PREFIX="cockpit-coolercontrol-builder-"
 
@@ -91,7 +92,7 @@ for target in "${TARGETS[@]}"; do
     echo "starting build for $target"
     (
         mkdir -p "out/$target"
-        docker run "${CONTAINER_RUN_OPTIONS[@]}" \
+        docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" \
             --volume "$SCRIPT_DIR/sources:/sources:ro,z" \
             --volume "$SCRIPT_DIR/patches:/patches:ro,z" \
             --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z" \
