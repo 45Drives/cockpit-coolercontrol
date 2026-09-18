@@ -51,6 +51,19 @@ jobs:
           coolercontrol-repackage/build-coolercontrold.sh
           cp -dR --preserve=mode coolercontrol-repackage/out/* \
             /mnt/ci_artifacts/${{ needs.prebuild.outputs.uuid }}/output/
+  
+      - name: Set artifact timestamp
+        if: always()
+        run: echo "TS=$(date +'%Y%m%d-%H%M%S')" >> "$GITHUB_ENV"
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repackage-coolercontrold-logs_${{ env.TS }}
+          path: |
+            coolercontrol-repackage/log/*.log
+          retention-days: 7
 
   sign:
     needs:
