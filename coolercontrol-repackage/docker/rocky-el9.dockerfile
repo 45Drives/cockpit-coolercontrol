@@ -27,7 +27,8 @@ RUN dnf module reset nodejs -y && dnf module enable nodejs:22 -y && dnf install 
 
 RUN curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain "$RUST_VERSION" \
-    && chmod -R a+rX "$CARGO_HOME" "$RUSTUP_HOME"
+    && test -x "$CARGO_HOME/bin/cargo" \
+    && test -x "$CARGO_HOME/bin/rustc"
 
 RUN mkdir -p /tmp/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS} \
     && printf '%s\n' \

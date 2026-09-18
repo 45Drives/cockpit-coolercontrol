@@ -40,7 +40,8 @@ RUN apt install -y nodejs
 
 RUN curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs \
     | sh -s -- -y --profile minimal --default-toolchain "$RUST_VERSION" \
-    && chmod -R a+rX "$CARGO_HOME" "$RUSTUP_HOME"
+    && test -x "$CARGO_HOME/bin/cargo" \
+    && test -x "$CARGO_HOME/bin/rustc"
 
 RUN rust_series="${RUST_VERSION%.*}" \
     && printf '%s\n' \
