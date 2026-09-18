@@ -6,8 +6,8 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 cd "$SCRIPT_DIR" || exit $?
 
-mkdir -p sources out log
-chmod 777 sources out log
+mkdir -p sources out/{debs,rpms} log
+chmod 777 sources out/{debs,rpms} log
 
 IMAGE_PREFIX="cockpit-coolercontrol-builder-"
 
@@ -92,12 +92,13 @@ for target in "${TARGETS[@]}"; do
     echo "starting build for $target"
     (
         mkdir -p "out/$target"
+        chmod 777 "out/$target"
         docker run --rm "${CONTAINER_RUN_OPTIONS[@]}" \
-            --volume "$SCRIPT_DIR/sources:/sources:ro,z" \
-            --volume "$SCRIPT_DIR/patches:/patches:ro,z" \
-            --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z" \
-            --volume "$SCRIPT_DIR/debian:/debian:ro,z" \
-            --volume "$SCRIPT_DIR/out/$target:/out:rw,Z" \
+            --volume "$SCRIPT_DIR/sources:/sources:ro,z,U" \
+            --volume "$SCRIPT_DIR/patches:/patches:ro,z,U" \
+            --volume "$SCRIPT_DIR/coolercontrold.spec:/home/rpmbuilder/rpmbuild/SPECS/coolercontrold.spec:ro,z,U" \
+            --volume "$SCRIPT_DIR/debian:/debian:ro,z,U" \
+            --volume "$SCRIPT_DIR/out/$target:/out:rw,Z,U" \
             "$IMAGE_PREFIX$target" > "log/$target.log" 2>&1 
         result=$?
         echo "$target exited $result"
