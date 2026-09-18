@@ -44,7 +44,7 @@ build_pids=()
 for target in "${TARGETS[@]}"; do
     (
     echo "building $IMAGE_PREFIX$target..."
-    docker build --pull -t "$IMAGE_PREFIX$target" --file "./docker/$target.dockerfile" ./docker # >/dev/null 2>&1
+    docker build --pull -t "$IMAGE_PREFIX$target" --file "./docker/$target.dockerfile" ./docker > "log/$IMAGE_PREFIX$target.log" 2>&1 
     result=$?
     echo "$IMAGE_PREFIX$target done ($result)"
     exit $result
@@ -58,6 +58,7 @@ for pid in "${build_pids[@]}"; do
     else
         result=$?
         echo "Build failed with PID $pid" >&2
+        cat "log/$IMAGE_PREFIX$target.log" >&2
         exit $result
     fi
 done
