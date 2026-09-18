@@ -3,7 +3,7 @@
   "content-security-policy": "default-src 'self' https://*:11987; script-src 'self'; connect-src 'self' https://*:11987; frame-src 'self' https://*:11987",
   "menu": {
     "coolercontrol": {
-      "label": "Coolercontrol",
+      "label": "CoolerControl",
       "path": "index.html",
       "order": 111
     }
