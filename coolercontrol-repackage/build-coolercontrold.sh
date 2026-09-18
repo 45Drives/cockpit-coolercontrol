@@ -6,6 +6,8 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 cd "$SCRIPT_DIR" || exit $?
 
+mkdir -p sources out log
+
 IMAGE_PREFIX="cockpit-coolercontrol-builder-"
 
 if command -v podman >/dev/null 2>&1; then
@@ -62,8 +64,6 @@ for pid in "${build_pids[@]}"; do
         exit $result
     fi
 done
-
-mkdir -p sources out log
 
 shopt -s nullglob
 for spec in *.spec; do
