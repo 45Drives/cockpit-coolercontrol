@@ -6,7 +6,7 @@
 
 Name:           %{project}d
 Version:        5.0.1
-Release:        45d%{?autorelease}%{!?autorelease:2%{?dist}}
+Release:        45d%{?autorelease}%{!?autorelease:1%{?dist}}
 Summary:        Powerful cooling control and monitoring
 Obsoletes:      coolercontrol-liqctld <= 2.2.2
 ExclusiveArch:  x86_64 aarch64
