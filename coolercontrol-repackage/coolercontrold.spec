@@ -33,9 +33,9 @@ Recommends:     lm_sensors
 Source0:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{project}-%{version}.tar.gz
 Source1:        https://gitlab.com/%{project}/%{project}/-/releases/%{version}/downloads/packages/%{name}-vendor-%{version}.tar.gz
 
-Patch0: 0001-allow-embedding-in-cross-origin-iframe.patch
-Patch1: 0002-feat-theme-add-color-scheme-change-listener-for-dyna.patch
-Patch2: 0003-feat-theme-update-color-palette-to-match-cockpit.patch
+Patch0: 0001-feat-theme-add-color-scheme-change-listener-for-dyna.patch
+Patch1: 0002-feat-theme-update-color-palette-to-match-cockpit.patch
+Patch2: 0003-add-custom-origins-to-CSP-frame-ancestors.patch
 
 %description
 This is the system daemon for CoolerControl.
