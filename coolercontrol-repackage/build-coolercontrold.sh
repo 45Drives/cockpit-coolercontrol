@@ -13,7 +13,7 @@ IMAGE_PREFIX="cockpit-coolercontrol-builder-"
 
 if command -v podman >/dev/null 2>&1; then
     CONTAINER_ENGINE=podman
-    CONTAINER_RUN_OPTIONS=(--userns=keep-id)
+    CONTAINER_RUN_OPTIONS=(--userns=keep-id --security-opt seccomp=unconfined)
 elif command -v docker >/dev/null 2>&1; then
     CONTAINER_ENGINE=docker
     CONTAINER_RUN_OPTIONS=()
