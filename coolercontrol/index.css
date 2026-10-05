@@ -64,6 +64,10 @@ iframe {
   display: none;
 }
 
+#error-message a {
+  color: #151515;
+}
+
 @media (prefers-color-scheme: dark) {
   #iframe-container {
     background: var(
@@ -76,6 +80,10 @@ iframe {
     color: #f0f0f0;
     background-color: #212427;
     box-shadow: 0 10px 20px 0 rgb(0 0 0 / 40%);
+  }
+
+  #error-message a {
+    color: #f0f0f0;
   }
 }
 
